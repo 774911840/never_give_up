@@ -1,0 +1,22 @@
+package com.weshare.marlin
+
+import com.weshare.marlin.auto.AutoMainV2
+import com.weshare.marlin.logging.WeshareLogging
+import com.weshare.marlin.model.conf2.TaskConf2
+import com.weshare.marlin.utils.CommonUtils
+
+object TestAutoV2Conf extends WeshareLogging {
+  def main(args: Array[String]): Unit = {
+    val jsonStr = "{\"bestPicUrl\":\"https://s3.pek3a.qingstor.com/viviidp/20181220/vivn_font_008401200936205375939_1545293817474.jpg?AWSAccessKeyId=XMGAYISVQYOFYSQMFENC&Expires=2176013822&Signature=8n%2FNCL1tY7hy8SniDAAHzySkZUA%3D\",\"record_gid\":\"66dfce71-559b-4d31-8f81-968a3f8257b5\",\"source\":\"菲律宾现金贷\",\"total_num\":1,\"userId\":\"2ad2c0094de042579a717a6ea2c835d0\",\"idcardNo\":\"008401200936205375939\",\"sptype\":\"mnl.baidu.detect\",\"crawlerTime\":\"1545293838277\",\"channel\":\"mnl\",\"channelSub\":\"2\",\"tokenId\":\"f3a8bb87fd1e6e60972cb1298533f3f9\",\"data_version\":\"1\",\"ch\":\"\",\"platform\":\"菲律宾身份认证\",\"userGid\":\"fttta8bb87fdsafd1e6e60972cb1298533f3f9\",\"baiduFaceDetectResult\":{\"face_num\":1,\"face_list\":[{\"face_token\":\"e6a9d99ae59d5075a9c68aff74ddf004\",\"location\":{\"left\":109.3,\"top\":166.87,\"width\":152,\"height\":149,\"rotation\":-2},\"face_probability\":1,\"angle\":{\"yaw\":1.82,\"pitch\":18.22,\"roll\":-3.97},\"landmark\":[{\"x_landmark\":148.11,\"y_landmark\":194.33},{\"x_landmark\":219.38,\"y_landmark\":191.7},{\"x_landmark\":183.85,\"y_landmark\":235.78},{\"x_landmark\":186.6,\"y_landmark\":274.49}],\"landmark72\":[{\"x_landmark72\":110.1,\"y_landmark72\":186.52},{\"x_landmark72\":112.69,\"y_landmark72\":210.76},{\"x_landmark72\":117.92,\"y_landmark72\":235.05},{\"x_landmark72\":125.08,\"y_landmark72\":259.07},{\"x_landmark72\":139.7,\"y_landmark72\":283.39}],\"age\":26,\"beauty\":22.52,\"expression\":{\"type_expression\":\"none\",\"probability_expression\":1},\"race\":{\"type_race\":\"yellow\",\"probability_race\":0.99999976158142},\"gender\":{\"type_gender\":\"female\",\"probability_gender\":1},\"glasses\":{\"type_glasses\":\"none\",\"probability_glasses\":1},\"face_shape\":{\"type_faceShape\":\"oval\",\"probability_faceShape\":0.47},\"eye_status\":{\"left_eye_status\":1,\"right_eye_status\":1},\"emotion\":{\"type_emotion\":\"fear\",\"probability_emotion\":0.29},\"quality\":{\"occlusion\":{\"left_eye\":0.1,\"right_eye\":0.1,\"nose\":0.1,\"mouth\":0.1,\"left_cheek\":0.02,\"right_cheek\":0.01,\"chin\":0.3},\"blur\":0.2,\"illumination\":151.1,\"completeness\":1}}]}}"
+
+    val conf2Json = "{\"mainConf\":{\"fileType\":\"gz\",\"filePath\":\"/apps/logs/raw/mnlbase\"},\"filterConf\":[{\"$.sptype\":\"mnl.baidu.detect\"}],\"fieldList\":[{\"fieldName\":\"token_id\",\"fieldPath\":\"$.tokenId\"},{\"fieldName\":\"record_gid\",\"fieldPath\":\"$.record_gid\"},{\"fieldName\":\"user_id\",\"fieldPath\":\"$.userId\"},{\"fieldName\":\"idcard_no\",\"fieldPath\":\"$.idcardNo\"},{\"fieldName\":\"sptype\",\"fieldPath\":\"$.sptype\"},{\"fieldName\":\"crawler_time\",\"fieldPath\":\"$.crawlerTime\"},{\"fieldName\":\"best_pic_url\",\"fieldPath\":\"$.bestPicUrl\"},{\"fieldName\":\"user_gid\",\"fieldPath\":\"$.userGid\"},{\"fieldName\":\"dm.landmark\",\"fieldPath\":\"$..landmark\"},{\"fieldName\":\"dm.landmark72\",\"fieldPath\":\"$..landmark72\"},{\"fieldName\":\"face_num\",\"fieldPath\":\"$.baiduFaceDetectResult.face_num\"}],\"packList\":[\"$.baiduFaceDetectResult.face_list[*].age\",\"$.baiduFaceDetectResult.face_list[*].angle..*\",\"$.baiduFaceDetectResult.face_list[*].beauty\",\"$.baiduFaceDetectResult.face_list[*].ageemotion..*\",\"$.baiduFaceDetectResult.face_list[*].expression..*\",\"$.baiduFaceDetectResult.face_list[*].eye_status..*\",\"$.baiduFaceDetectResult.face_list[*].face_probability\",\"$.baiduFaceDetectResult.face_list[*].face_shape..*\",\"$.baiduFaceDetectResult.face_list[*].face_token\",\"$.baiduFaceDetectResult.face_list[*].gender..*\",\"$.baiduFaceDetectResult.face_list[*].glasses..*\",\"$.baiduFaceDetectResult.face_list[*].location..*\",\"$.baiduFaceDetectResult.face_list[*].quality..*\",\"$.baiduFaceDetectResult.face_list[*].race..*\"],\"maskList\":[{\"fieldPath\":\"$..idCard\",\"contentType\":\"idcard\"}]}"
+    val conf2 = CommonUtils.mapper.readValue[TaskConf2](conf2Json)
+    val schemas = MarlinDef.getSchema(null, Array[TaskConf2](conf2))
+
+    val rows = AutoMainV2.process(jsonStr, schemas.fieldNames, Array[TaskConf2](conf2))
+
+    rows.foreach { row =>
+      logger.info(CommonUtils.objToJson(row))
+    }
+  }
+}
